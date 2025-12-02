@@ -23,7 +23,7 @@ contract ERC4337Account is BaseAccount {
     function _validateSignature(
         PackedUserOperation calldata userOp,
         bytes32 userOpHash
-    ) internal override returns (uint256) {
+    ) internal view override returns (uint256) {
         bytes32 digest = MessageHashUtils.toEthSignedMessageHash(userOpHash);
         address messageSigner = ECDSA.recover(digest, userOp.signature);
         if (messageSigner == _i_owner) {

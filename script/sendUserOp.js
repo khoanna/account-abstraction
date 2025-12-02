@@ -80,7 +80,7 @@ async function main() {
   // === Build UserOperation ===
 
   const dest = "0x828e4c8e2d006c3653faf887b9444e9d219ce174";
-  const value = ethers.parseEther("0.02");
+  const value = ethers.parseEther("0.01");
   const func = "0x";
 
   const callData = account.interface.encodeFunctionData("execute", [
@@ -110,7 +110,6 @@ async function main() {
     ["uint128", "uint128"],
     [maxPriorityFeePerGas, maxFeePerGas]
   );
-
 
   const packedPaymasterAndData = ethers.solidityPacked(
     ["address", "uint128", "uint128", "bytes"],
