@@ -14,16 +14,17 @@ const ENTRY_POINT_ADDRESS = "0x0000000071727De22E5E9d8BAf0edAc6f37da032";
 const PAYMASTER_ADDRESS = "0x846d83E646B8e740bDe4F5f63C0849208817Cff9";
 const ERC4337_ACCOUNT = "0x9dCA2C8DF78752DeA4154B69659e0fc1454f9cB2";
 
-async function checkBalance(address) {
-  const entryPoint = new ethers.Contract(
-    ENTRY_POINT_ADDRESS,
-    ENTRY_POINT_ABI,
-    PROVIDER
-  );
-  const depositInfo = await entryPoint.balanceOf(address);
-  console.log("🏦 EntryPoint balance:", ethers.formatEther(depositInfo), "ETH");
-  const balance = await PROVIDER.getBalance(address);
-  console.log("👛 Account balance:", ethers.formatEther(balance), "ETH");
+async function checkBalance() {
+  const entryPoint = new ethers.Contract(ENTRY_POINT_ADDRESS, ENTRY_POINT_ABI, PROVIDER);
+  const depositInfo = await entryPoint.balanceOf(ERC4337_ACCOUNT);
+  console.log("🏦 EntryPoint balance of account:", ethers.formatEther(depositInfo), "ETH");
+  const balance = await PROVIDER.getBalance(ERC4337_ACCOUNT);
+  console.log("👛 Account balance of account:", ethers.formatEther(balance), "ETH");
+
+  const paymasterDeposit = await entryPoint.balanceOf(PAYMASTER_ADDRESS);
+  console.log("🏦 EntryPoint balance of paymaster:", ethers.formatEther(paymasterDeposit), "ETH");
+  const paymasterBalance = await PROVIDER.getBalance(PAYMASTER_ADDRESS);
+  console.log("👛 Account balance of paymaster:", ethers.formatEther(paymasterBalance), "ETH");
 }
 
 async function stakeForPaymaster() {
@@ -32,22 +33,17 @@ async function stakeForPaymaster() {
     name: "sepolia",
   });
   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
-  const paymaster = new ethers.Contract(
-    PAYMASTER_ADDRESS,
-    PAYMASTER_ABI,
-    wallet
-  );
+  const paymaster = new ethers.Contract(PAYMASTER_ADDRESS, PAYMASTER_ABI, wallet);
 
   console.log("🚀 Staking for Paymaster:", PAYMASTER_ADDRESS);
   console.log("Executor:", wallet.address);
 
-  const stakeAmount = ethers.parseEther("0.1"); 
-  const delaySeconds = 86400; 
+  const stakeAmount = ethers.parseEther("0.1");
+  const delaySeconds = 86400;
 
   console.log(`⏳ Sending Stake transaction...`);
   console.log(`   - Amount: ${ethers.formatEther(stakeAmount)} ETH`);
   console.log(`   - Delay: ${delaySeconds} seconds`);
-
 
   const tx = await paymaster.addStake(delaySeconds, {
     value: stakeAmount,
@@ -69,25 +65,17 @@ async function main() {
 
   // === Initialize contracts and wallet ===
   const owner = new ethers.Wallet(process.env.PRIVATE_KEY, PROVIDER);
-  const entryPoint = new ethers.Contract(
-    ENTRY_POINT_ADDRESS,
-    ENTRY_POINT_ABI,
-    PROVIDER
-  );
+  const entryPoint = new ethers.Contract(ENTRY_POINT_ADDRESS, ENTRY_POINT_ABI, PROVIDER);
   const account = new ethers.Contract(ERC4337_ACCOUNT, ACCOUNT_ABI, PROVIDER);
   // ======================================
 
   // === Build UserOperation ===
 
   const dest = "0x828e4c8e2d006c3653faf887b9444e9d219ce174";
-  const value = ethers.parseEther("0.01");
+  const value = ethers.parseEther("0.001");
   const func = "0x";
 
-  const callData = account.interface.encodeFunctionData("execute", [
-    dest,
-    value,
-    func,
-  ]);
+  const callData = account.interface.encodeFunctionData("execute", [dest, value, func]);
 
   const nonce = await entryPoint.getNonce(ERC4337_ACCOUNT, 0n);
   const verificationGasLimit = 60000n;
@@ -113,12 +101,7 @@ async function main() {
 
   const packedPaymasterAndData = ethers.solidityPacked(
     ["address", "uint128", "uint128", "bytes"],
-    [
-      paymasterAddress,
-      paymasterVerificationGasLimit,
-      paymasterPostOpGasLimit,
-      paymasterData,
-    ]
+    [paymasterAddress, paymasterVerificationGasLimit, paymasterPostOpGasLimit, paymasterData]
   );
 
   const packedUserOpForHash = {
@@ -158,9 +141,7 @@ async function main() {
     maxPriorityFeePerGas: ethers.toBeHex(maxPriorityFeePerGas),
 
     paymaster: PAYMASTER_ADDRESS,
-    paymasterVerificationGasLimit: ethers.toBeHex(
-      paymasterVerificationGasLimit
-    ),
+    paymasterVerificationGasLimit: ethers.toBeHex(paymasterVerificationGasLimit),
     paymasterPostOpGasLimit: ethers.toBeHex(paymasterPostOpGasLimit),
     paymasterData: paymasterData,
 
@@ -192,7 +173,7 @@ async function main() {
   }
 }
 
-checkBalance(ERC4337_ACCOUNT).catch((error) => {
+checkBalance().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
