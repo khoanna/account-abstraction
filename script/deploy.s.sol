@@ -3,8 +3,8 @@ pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
 import {ERC4337Account} from "../src/Account.sol";
-import { IEntryPoint } from "account-abstraction/contracts/interfaces/IEntryPoint.sol";
-import { Paymaster } from "../src/Paymaster.sol";
+import {IEntryPoint} from "account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import {Paymaster} from "../src/Paymaster.sol";
 
 contract AccountScript is Script {
     ERC4337Account public account;

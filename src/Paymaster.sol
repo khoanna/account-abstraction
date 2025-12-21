@@ -1,22 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import { BasePaymaster } from "account-abstraction/contracts/core/BasePaymaster.sol";   
-import { IEntryPoint } from "account-abstraction/contracts/interfaces/IEntryPoint.sol";
-import { PackedUserOperation } from "account-abstraction/contracts/interfaces/PackedUserOperation.sol";
-import { SIG_VALIDATION_FAILED, SIG_VALIDATION_SUCCESS } from "account-abstraction/contracts/core/Helpers.sol";
-
+import {BasePaymaster} from "account-abstraction/contracts/core/BasePaymaster.sol";
+import {IEntryPoint} from "account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import {PackedUserOperation} from "account-abstraction/contracts/interfaces/PackedUserOperation.sol";
+import {SIG_VALIDATION_FAILED, SIG_VALIDATION_SUCCESS} from "account-abstraction/contracts/core/Helpers.sol";
 
 contract Paymaster is BasePaymaster {
     mapping(address => bool) private _whitelist;
 
     constructor(IEntryPoint entryPoint) BasePaymaster(entryPoint, msg.sender) {}
 
-    function _validatePaymasterUserOp(
-        PackedUserOperation calldata userOp,
-        bytes32 userOpHash,
-        uint256 maxCost
-    )
+    function _validatePaymasterUserOp(PackedUserOperation calldata userOp, bytes32 userOpHash, uint256 maxCost)
         internal
         view
         override

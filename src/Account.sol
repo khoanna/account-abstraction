@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import { BaseAccount } from "account-abstraction/contracts/core/BaseAccount.sol";
-import { IEntryPoint } from "account-abstraction/contracts/interfaces/IEntryPoint.sol";
-import { PackedUserOperation } from "account-abstraction/contracts/interfaces/PackedUserOperation.sol";
-import { SIG_VALIDATION_FAILED, SIG_VALIDATION_SUCCESS } from "account-abstraction/contracts/core/Helpers.sol";
+import {BaseAccount} from "account-abstraction/contracts/core/BaseAccount.sol";
+import {IEntryPoint} from "account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import {PackedUserOperation} from "account-abstraction/contracts/interfaces/PackedUserOperation.sol";
+import {SIG_VALIDATION_FAILED, SIG_VALIDATION_SUCCESS} from "account-abstraction/contracts/core/Helpers.sol";
 
-import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 contract ERC4337Account is BaseAccount {
     IEntryPoint private immutable _i_entryPoint;
@@ -20,10 +20,12 @@ contract ERC4337Account is BaseAccount {
         _i_owner = owner;
     }
 
-    function _validateSignature(
-        PackedUserOperation calldata userOp,
-        bytes32 userOpHash
-    ) internal view override returns (uint256) {
+    function _validateSignature(PackedUserOperation calldata userOp, bytes32 userOpHash)
+        internal
+        view
+        override
+        returns (uint256)
+    {
         bytes32 digest = MessageHashUtils.toEthSignedMessageHash(userOpHash);
         address messageSigner = ECDSA.recover(digest, userOp.signature);
         if (messageSigner == _i_owner) {
@@ -33,13 +35,9 @@ contract ERC4337Account is BaseAccount {
         }
     }
 
-    function execute(
-        address dest,
-        uint256 value,
-        bytes calldata funcCallData
-    ) override external {
+    function execute(address dest, uint256 value, bytes calldata funcCallData) external override {
         _requireFromEntryPoint();
-        (bool success, ) = dest.call{value: value}(funcCallData);
+        (bool success,) = dest.call{value: value}(funcCallData);
         if (!success) {
             revert Account__CallFailed();
         }

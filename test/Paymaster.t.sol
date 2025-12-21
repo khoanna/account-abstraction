@@ -3,10 +3,10 @@ import {Vm} from "forge-std/Vm.sol";
 
 import {ERC4337Account} from "../src/Account.sol";
 import {PackedUserOperation} from "account-abstraction/contracts/interfaces/PackedUserOperation.sol";
-import { EntryPoint } from "account-abstraction/contracts/core/EntryPoint.sol";
+import {EntryPoint} from "account-abstraction/contracts/core/EntryPoint.sol";
 import {Paymaster} from "../src/Paymaster.sol";
-import { SIG_VALIDATION_SUCCESS } from "account-abstraction/contracts/core/Helpers.sol";
-import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {SIG_VALIDATION_SUCCESS} from "account-abstraction/contracts/core/Helpers.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 contract BaseSetup is Test {
     Vm internal constant VM = Vm(VM_ADDRESS);
@@ -15,19 +15,19 @@ contract BaseSetup is Test {
     EntryPoint internal entryPoint;
     Paymaster internal paymaster;
 
-    uint256 internal _ownerKey=10;
+    uint256 internal _ownerKey = 10;
     address internal _ownerAddress = VM.addr(_ownerKey);
 
-    uint256 internal _aliceKey=1;
+    uint256 internal _aliceKey = 1;
     address internal _aliceAddress = VM.addr(_aliceKey);
 
-    uint256 internal _bobKey=2;
+    uint256 internal _bobKey = 2;
     address internal _bobAddress = VM.addr(_bobKey);
 
     function setUp() public {
         entryPoint = new EntryPoint();
         account = new ERC4337Account(address(entryPoint), _aliceAddress);
-        
+
         VM.prank(_ownerAddress);
         paymaster = new Paymaster(entryPoint);
         VM.stopPrank();
@@ -73,10 +73,7 @@ contract PaymasterTest is BaseSetup {
 
         bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
         bytes32 formattedUserOpHash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
-        (uint8 v, bytes32 r, bytes32 s) = VM.sign(
-            _aliceKey,
-            formattedUserOpHash
-        );
+        (uint8 v, bytes32 r, bytes32 s) = VM.sign(_aliceKey, formattedUserOpHash);
         userOp.signature = abi.encodePacked(r, s, v);
 
         VM.prank(address(entryPoint));
